@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/8/5 22:51
 # @Author  : Dominolu
-# @File    : __init__.py.py
+# @File    : __init__.py
 # @Software: PyCharm
 from dynaconf import Dynaconf
 

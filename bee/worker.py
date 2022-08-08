@@ -22,7 +22,7 @@ class Woker(object):
     update_rate=5
     def __init__(self):
         self.signal = False
-        self.queue=await aioredis.from_url(cfg.REDIS,decode_responses=True)
+        self.queue=aioredis.from_url(cfg.REDIS,decode_responses=True)
         self.session=aiohttp.ClientSession()
         self.rateLimit={}
         self.id=get_hostname()
@@ -100,9 +100,9 @@ class Woker(object):
 
     async def start(self):
         self.signal=True
-        self.run()
+        await self.run()
 
-    def run(self):
+    async def run(self):
         """
         根据Worker_name从redis获取对应的项目列表
         根据task_name 从redis 队珍中获取爬虫任务
