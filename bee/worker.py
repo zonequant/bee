@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/7/31 11:55
 # @Author  : Dominolu
-# @File    : spider.py
+# @File    : worker.py
 # @Software: PyCharm
 
 import asyncio
@@ -18,9 +18,7 @@ from bee.tools import *
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
 }
-
-
-class Spider(object):
+class Woker(object):
     update_rate=5
     def __init__(self):
         self.signal = False
@@ -95,7 +93,6 @@ class Spider(object):
                 else:
                     log.debug(f"Task:{key}-{job.url} is download error.")
         except:
-
             log.error(traceback.format_exc())
 
     def stop(self):
@@ -103,9 +100,9 @@ class Spider(object):
 
     async def start(self):
         self.signal=True
-        self.worker()
+        self.run()
 
-    def worker(self):
+    def run(self):
         """
         根据Worker_name从redis获取对应的项目列表
         根据task_name 从redis 队珍中获取爬虫任务
@@ -124,5 +121,5 @@ class Spider(object):
         log.info(f"{self.id}-Spide worder is stoped.")
 
 if __name__ == "__main__":
-    spider=Spider()
+    spider=Woker()
     loop = asyncio.run(spider.start())
