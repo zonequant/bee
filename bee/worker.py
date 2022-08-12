@@ -18,6 +18,8 @@ from bee.tools import *
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
 }
+
+
 class Woker(object):
     update_rate=5
     def __init__(self):
@@ -28,8 +30,6 @@ class Woker(object):
         self.id=get_hostname()
         self.count=0
         self.last_update=0
-
-
 
     async def update(self):
         if get_timestamp()-self.last_update>self.update_rate:

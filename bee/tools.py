@@ -29,7 +29,7 @@ def get_network_info():
         conns = ps.net_connections()
         count = 0
         for conn in conns:
-            if conn.status is 'ESTABLISHED':
+            if conn.status == 'ESTABLISHED':
                 count = count + 1
         return {'count':len(conns),'established':count}
 
