@@ -11,15 +11,23 @@ import asyncio
 import traceback
 
 from loguru import logger as log
-
-
+import configparser
+import aioredis
 class Spider(object):
     name = ""
     start_urls=[]
 
     def __init__(self, queue):
-        self.queue = queue
+        # todo 初始化配置文件与redis
+        self.config=self.get_config()
+        self.queue=aioredis.from_url(self.config.REDIS,decode_responses=True)
 
+
+    def get_config(self):
+        # 获取本爬虫的配制文件
+        cfg=configparser.ConfigParser()
+        cfg.read("./spide.cfg")
+        return cfg
 
     async def start_requests(self):
         """
