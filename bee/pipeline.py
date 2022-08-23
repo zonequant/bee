@@ -18,5 +18,5 @@ class Pipeline(object):
     def close(self):
         pass
 
-    def process_item(self, item):
+    def process_item(self,table, item):
         return item

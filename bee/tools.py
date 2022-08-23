@@ -10,7 +10,7 @@ import psutil as ps
 from datetime import datetime
 
 def get_hostname():
-    socket.gethostname()
+    return socket.gethostname()
 
 def get_host_ip():
     """
@@ -48,8 +48,11 @@ def get_cpu_info():
     cpu['iowait'] = cpu_times.iowait
     return cpu
 
-def get_timestamp():
+def get_timestamp_s():
     return int((datetime.timestamp(datetime.now())))
+
+def get_timestamp_ms():
+    return int((datetime.timestamp(datetime.now()))*1000)
 
 def get_mem_info(self):
     mem_info = ps.virtual_memory()

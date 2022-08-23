@@ -4,54 +4,97 @@
 # @Author  : Dominolu
 # @File    : spider.py
 # @Software: PyCharm
+import asyncio
 import json
-
-
+import time
+import traceback
+from bee.tools import *
+from loguru import logger as log
 
 from bee.spider import Spider
-
+from datetime import datetime
 
 class Okex(Spider):
     start_urls=["https://www.okx.com/api/v5/public/instruments?instType=SWAP"]
+    name="okex"
 
-    def parse_liquidation(self,response):
+    async def parse_liquidation(self,data):
         # todo 解析数据生成items
-        data=json.loads(response.text)
-        data=data["data"]
+        response = data.get("response")
+        data=json.loads(response)
+        data=data["data"][0]
         symbol=data["uly"]
         details=data["details"]
         items=[]
         for i in details:
             side=i.get("side")
-            sz=i.get("sz")
-            ts=i.get('tz')
-            item={"symbol":symbol,"side":side,"sz":sz,"ts":ts}
+            sz=float(i.get("sz"))
+            price=float(i.get("bkPx"))
+            ts=datetime.fromtimestamp(int(i.get('ts'))/1000)
+            item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
             items.append(item)
+        if len(items)>0:
+            ts=items[-1]["ts"]
+            ts=int(ts.timestamp()*1000)
+        else:
+            ts=get_timestamp_ms()
+        self.next(symbol,ts)
         return items
 
-    def pipe_item(self, items):
+    def next(self, symbol,ts):
+        """
+        处理解析数据后的逻辑，生成新请求&存储数据
+        """
+        url = "https://www.okx.com/api/v5/public/liquidation-orders"
+        param = {"uly": symbol, "instType": "SWAP", "state": "filled", "before": ts}
+        next_ts=get_timestamp_ms()+10*1000
+        self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
+
+    async def pipe_item(self, items):
         # todo 保存数据库
-        # self.db.insert(items)
-        pass
+        await self.db.process_item("liquidation",items)
 
-
-    def parse(self, response):
+    async def parse(self, data):
         """
         断点续传
         """
-        url="https://www.okx.com/api/v5/public/liquidation-orders"
-        data=json.loads(response.text)
-        data=data["data"]
-        for i in data:
-            symbol=i["uly"]
-            if self.check_symbol(symbol):
-                param=self.get_param(symbol)
-                self.request(url,data=param,callback="parse_liquidation")
+        try:
+            self.reset_queue()
+            response = data.get("response")
+            url="https://www.okx.com/api/v5/public/liquidation-orders"
+            data=json.loads(response)
+            data=data["data"]
+            symbol="BTC-USDT"
+            param = await self.get_param(symbol)
+            await self.request(url, data=param, callback="parse_liquidation")
+            # for i in data:
+            #     symbol=i["uly"]
+            #     if i["ctValCcy"]!="USD":
+            #         param = await self.get_param(symbol)
+            #         await self.request(url,data=param,callback="parse_liquidation")
+        except:
+            log.error(traceback.format_exc())
 
-    def check_symbol(self,symbol):
+    def reset_queue(self):
         # todo 检查任务队列中是否存在对应的下载任务
-        pass
+        key = self.name + ":in"
+        self.queue.delete(key)
 
-    def get_param(self,symbol):
+    async def get_param(self,symbol):
         # todo 从数据中获取最近需要下载的参数
-        pass
+        sql="select max(ts) from liquidation where symbol=%s and broker=%s"
+        ds=await self.db.select(sql,[symbol,self.name])
+        rs=ds[0]
+        if rs[0]==None:
+            param = {"uly": symbol,"instType":"SWAP","state":"filled", "before": 0}
+        else:
+            t=int(rs[0].timestamp()*1000)
+            param={"uly":symbol,"instType":"SWAP","state":"filled","before":t}
+        return param
+
+
+
+if __name__ == '__main__':
+
+    spider=Okex()
+    spider.run()
