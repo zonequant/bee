@@ -123,8 +123,9 @@ class Woker(object):
         根据task_name 从redis 队珍中获取爬虫任务
         """
         log.info(f"{self.id}-Spide worder is started.")
+        key=self.prex_job_name+self.id
         while self.signal:
-            tasks = await self.queue.hgetall(self.prex_job_name+self.id)
+            tasks = await self.queue.hgetall(key)
             if tasks:
                 try:
                     for k,v in tasks.items():
