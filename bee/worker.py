@@ -114,6 +114,7 @@ class Woker(object):
 
 
     def run(self):
+        self.signal=True
         self.loop.run_until_complete(self.start())
 
     async def start(self):
