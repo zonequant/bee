@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+dynaconf = "*"
+asyncio = "*"
+aiohttp = "*"
+aioredis = "*"
+loguru = "*"
+psutil = "*"
+uuid = "*"
+aiomysql = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"

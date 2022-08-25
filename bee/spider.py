@@ -15,6 +15,7 @@ import configparser
 import aioredis
 from bee.mysqlpipeline import Mysqlpipline
 from bee.tools import *
+
 def get_config():
     # 获取本爬虫的配制文件
     cfg=configparser.ConfigParser()
