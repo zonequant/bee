@@ -3,7 +3,6 @@
 # @Time    : 2022/8/6 11:33
 # @Author  : Dominolu
 # @File    : tools.py
-# @Software: PyCharm
 import socket
 import uuid
 import psutil as ps

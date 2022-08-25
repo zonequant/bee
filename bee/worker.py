@@ -32,6 +32,7 @@ class Woker(object):
         self.rateLimit={}
         self.last_request={}
         self.id=get_hostname()
+        log.debug(self.id)
         self.count=0
         self.last_update=0
 
@@ -123,6 +124,7 @@ class Woker(object):
         根据task_name 从redis 队珍中获取爬虫任务
         """
         log.info(f"{self.id}-Spide worder is started.")
+
         key=self.prex_job_name+self.id
         while self.signal:
             tasks = await self.queue.hgetall(key)
