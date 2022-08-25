@@ -26,6 +26,7 @@ class Woker(object):
     prex_name = "bee:worker"
     def __init__(self):
         self.signal = False
+        self.loop = asyncio.get_event_loop()
         self.queue=aioredis.from_url(cfg.REDIS,decode_responses=True)
         self.session=None
         self.rateLimit={}
@@ -111,11 +112,11 @@ class Woker(object):
     def stop(self):
         self.signal=False
 
-    async def start(self):
-        self.signal=True
-        await self.run()
 
-    async def run(self):
+    def run(self):
+        self.loop.run_until_complete(self.start())
+
+    async def start(self):
         """
         根据Worker_name从redis获取对应的项目列表
         根据task_name 从redis 队珍中获取爬虫任务
@@ -137,4 +138,4 @@ class Woker(object):
 
 if __name__ == "__main__":
     spider=Woker()
-    loop = asyncio.run(spider.start())
+    spider.run()
