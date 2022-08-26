@@ -1,0 +1,10 @@
+{
+  "mongo": {
+    "host": "127.0.0.1",
+    "database": "ft",
+    "table": "markets",
+    "user": "ftx",
+    "password": "82MeBmW63mhXe3LC"
+  },
+  "lenght": 15
+}
