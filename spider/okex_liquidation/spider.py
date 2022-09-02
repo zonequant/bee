@@ -59,7 +59,7 @@ class Okex(Spider):
         断点续传
         """
         try:
-            self.reset_queue()
+            await self.reset_queue()
             response = data.get("response")
             url="https://www.okx.com/api/v5/public/liquidation-orders"
             data=json.loads(response)
@@ -75,10 +75,10 @@ class Okex(Spider):
         except:
             log.error(traceback.format_exc())
 
-    def reset_queue(self):
+    async def reset_queue(self):
         # todo 检查任务队列中是否存在对应的下载任务
         key = self.name + ":in"
-        self.queue.delete(key)
+        await self.queue.delete(key)
 
     async def get_param(self,symbol):
         # todo 从数据中获取最近需要下载的参数
