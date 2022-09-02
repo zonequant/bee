@@ -64,14 +64,14 @@ class Okex(Spider):
             url="https://www.okx.com/api/v5/public/liquidation-orders"
             data=json.loads(response)
             data=data["data"]
-            symbol="BTC-USDT"
-            param = await self.get_param(symbol)
-            await self.request(url, data=param, callback="parse_liquidation")
-            # for i in data:
-            #     symbol=i["uly"]
-            #     if i["ctValCcy"]!="USD":
-            #         param = await self.get_param(symbol)
-            #         await self.request(url,data=param,callback="parse_liquidation")
+            # symbol="BTC-USDT"
+            # param = await self.get_param(symbol)
+            # await self.request(url, data=param, callback="parse_liquidation")
+            for i in data:
+                symbol=i["uly"]
+                if i["ctValCcy"]!="USD":
+                    param = await self.get_param(symbol)
+                    await self.request(url,data=param,callback="parse_liquidation")
         except:
             log.error(traceback.format_exc())
 
