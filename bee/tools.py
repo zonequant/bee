@@ -67,7 +67,7 @@ def get_mac_address():
     MAC = ":".join([mac[e: e + 2] for e in range(0, 11, 2)])
     return MAC
 
-def ts_to_datetime_str(ts=None, fmt='%Y-%m-%d %H:%M:%S.%F'):
+def ts_to_datetime_str(ts=None, fmt='%Y-%m-%d %H:%M:%S.%f'):
     """ 将时间戳转换为日期时间格式，年-月-日 时:分:秒,毫秒
     @param ts 时间戳，默认None即为当前时间戳
     @param fmt 返回的日期字符串格式
