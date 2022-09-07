@@ -70,8 +70,8 @@ class Bybit_liqudation(Websocket):
                 else:
                     cursor.execute(sql)
                 self.db.commit()
-            log.debug(sql)
-            log.debug(param)
+            # log.debug(sql)
+            # log.debug(param)
         except Exception as e:
             traceback.print_exc()
             # 回滚所有更改

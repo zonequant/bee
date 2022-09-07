@@ -41,6 +41,7 @@ class Woker(object):
             connector = aiohttp.TCPConnector()
             self.session = aiohttp.ClientSession(connector=connector)
         return self.session
+
     async def update(self):
         if get_timestamp_s()-self.last_update>self.update_rate:
             data={"time":get_timestamp_s(),

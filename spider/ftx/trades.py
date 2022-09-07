@@ -4,6 +4,7 @@
 # @Author  : Dominolu
 # @File    : trades.py
 # @Software: PyCharm
+import asyncio
 import traceback
 
 import aiohttp
@@ -38,8 +39,15 @@ class Ftx_liqudation(Websocket):
         """
         self.init(self.url, self.connected_callback, self.process_callback, self.process_binary_callback)
         self._loop.create_task(self._connect())
-        # self._loop.create_task(self.ping())
 
+
+    async def ping(self):
+        while True:
+            try:
+                await self.send({'op': 'ping'})
+                await asyncio.sleep(15)
+            except:
+                log.error("send ping error!")
 
 
     async def connected_callback(self):
@@ -52,7 +60,7 @@ class Ftx_liqudation(Websocket):
                     symbol=i["name"]
                     await self.send({'op': 'subscribe', 'channel': 'trades', 'market': symbol})
         # await self.send({'op': 'subscribe', 'channel': 'trades'})
-
+        self._loop.create_task(self.ping())
 
 
     async def process_callback(self,data):
