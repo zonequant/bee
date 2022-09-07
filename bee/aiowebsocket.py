@@ -69,6 +69,8 @@ class Websocket():
         self.process_binary_callback = process_binary_callback
         self.process_callback = process_callback
 
+    async def conn(self):
+        await self._connect()
 
     async def _connect(self):
         session = aiohttp.ClientSession()

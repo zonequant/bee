@@ -12,6 +12,7 @@ loguru = "*"
 psutil = "*"
 uuid = "*"
 aiomysql = "*"
+cryptography = "*"
 
 [dev-packages]
 

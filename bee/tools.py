@@ -66,3 +66,12 @@ def get_mac_address():
     mac = uuid.UUID(int=uuid.getnode()).hex[-12:]
     MAC = ":".join([mac[e: e + 2] for e in range(0, 11, 2)])
     return MAC
+
+def ts_to_datetime_str(ts=None, fmt='%Y-%m-%d %H:%M:%S.%F'):
+    """ 将时间戳转换为日期时间格式，年-月-日 时:分:秒,毫秒
+    @param ts 时间戳，默认None即为当前时间戳
+    @param fmt 返回的日期字符串格式
+    """
+
+    dt = datetime.fromtimestamp(ts / 1000)
+    return dt.strftime(fmt)

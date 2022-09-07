@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/8/10 23:50
 # @Author  : Dominolu
-# @File    : spider.py
+# @File    : liquidation.py
 # @Software: PyCharm
 
 import json
