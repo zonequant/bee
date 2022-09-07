@@ -47,7 +47,6 @@ class Binance_liqudation(Websocket):
         await self.send('{"method":"SUBSCRIBE","params":["!forceOrder@arr"],"id":1024}')
 
     async def process_callback(self,data):
-        print(data)
         try:
             e=data.get("e",None)
             if "forceOrder" ==e:
