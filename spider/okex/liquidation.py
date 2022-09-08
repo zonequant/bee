@@ -38,7 +38,7 @@ class Okex(Spider):
             items.append(item)
         if len(items)>0:
             ts=items[-1]["ts"]
-            ts=int(ts.timestamp()*1000)
+            ts=int(ts.timestamp()*1000)+1
         else:
             ts=get_timestamp_ms()
         self.next(symbol,ts)
