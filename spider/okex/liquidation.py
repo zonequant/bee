@@ -51,9 +51,8 @@ class Okex(Spider):
         url = "https://www.okx.com/api/v5/public/liquidation-orders"
         param = {"uly": symbol, "instType": "SWAP", "state": "filled", "before": ts}
         next_ts=get_timestamp_ms()+self.period*1000
-        if symbol=="BTC-USDT":
-            self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
-            log.info(f"推入延时队列{next_ts}-{param}")
+        self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
+        # log.info(f"推入延时队列{next_ts}-{param}")
 
     async def pipe_item(self, items):
         # todo 保存数据库

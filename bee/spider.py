@@ -84,7 +84,7 @@ class Spider(object):
             data = await self.queue.lpop(key)
             if data:
                 job = json.loads(data)
-                log.debug(f"New response:{job['url']}")
+                log.debug(f"New response:{job['url']}-{job['data']}")
                 item = await self.process_response(job)
                 if item:
                     await self.pipe_item(item)
