@@ -10,7 +10,7 @@ import time
 import traceback
 from bee.tools import *
 from loguru import logger as log
-
+import requests
 from bee.spider import Spider
 from datetime import datetime
 
@@ -20,6 +20,20 @@ class Okex(Spider):
     request_param = {"limit": 50} #访问频率 毫秒/次
     markets={}
     period=60 #多少周期开始一次更新 秒
+
+    def __init__(self):
+        super(Okex, self).__init__()
+        reponse=requests.get(self.start_urls[0])
+        data=reponse.json()
+        data = data["data"]
+        for i in data:
+            symbol = i["uly"]
+            if i["ctValCcy"] != "USD":
+                ctVal = i["ctVal"]
+                self.markets[symbol] = float(ctVal)
+
+
+
     async def parse_liquidation(self,data):
         # todo 解析数据生成items
         response = data.get("response")
@@ -39,18 +53,22 @@ class Okex(Spider):
         if len(items)>0:
             ts=items[-1]["ts"]
             ts=int(ts.timestamp()*1000)+100
+            self.next(symbol, ts)
         else:
             ts=get_timestamp_ms()
-        self.next(symbol,ts)
+            self.next(symbol, ts,True)
         return items
 
-    def next(self, symbol,ts):
+    def next(self, symbol,ts,delay=False):
         """
         处理解析数据后的逻辑，生成新请求&存储数据
         """
         url = "https://www.okx.com/api/v5/public/liquidation-orders"
         param = {"uly": symbol, "instType": "SWAP", "state": "filled", "before": ts}
-        next_ts=get_timestamp_ms()+self.period*1000
+        if delay:
+            next_ts=get_timestamp_ms()+self.period*1000
+        else:
+            next_ts = get_timestamp_ms()+1000
         self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
         # log.info(f"推入延时队列{next_ts}-{param}")
 
@@ -75,9 +93,8 @@ class Okex(Spider):
                 symbol=i["uly"]
                 if i["ctValCcy"]!="USD":
                     param = await self.get_param(symbol)
-                    ctVal=i["ctVal"]
-                    self.markets[symbol]=float(ctVal)
                     await self.request(url,data=param,callback="parse_liquidation")
+                    # log.info(f"new request {url}-{param}")
         except:
             log.error(traceback.format_exc())
 

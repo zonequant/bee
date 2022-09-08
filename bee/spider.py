@@ -9,7 +9,7 @@ import json
 import time
 import asyncio
 import traceback
-
+import aiohttp
 from loguru import logger as log
 import configparser
 import aioredis
