@@ -17,7 +17,9 @@ from datetime import datetime
 class Okex(Spider):
     start_urls=["https://www.okx.com/api/v5/public/instruments?instType=SWAP"]
     name="okex"
-
+    request_param = {"limit": 50} #访问频率 毫秒/次
+    markets={}
+    period=60 #多少周期开始一次更新 秒
     async def parse_liquidation(self,data):
         # todo 解析数据生成items
         response = data.get("response")
@@ -29,7 +31,8 @@ class Okex(Spider):
         for i in details:
             side=i.get("side")
             sz=float(i.get("sz"))
-            price=float(i.get("bkPx"))
+            price = float(i.get("bkPx"))
+            sz=self.markets[symbol]*sz
             ts=datetime.fromtimestamp(int(i.get('ts'))/1000)
             item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
             items.append(item)
@@ -47,9 +50,9 @@ class Okex(Spider):
         """
         url = "https://www.okx.com/api/v5/public/liquidation-orders"
         param = {"uly": symbol, "instType": "SWAP", "state": "filled", "before": ts}
-        next_ts=get_timestamp_ms()+10*1000
+        next_ts=get_timestamp_ms()+self.period*1000
         self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
-
+        # log.info(f"推入延时队列{next_ts}-{param}")
     async def pipe_item(self, items):
         # todo 保存数据库
         await self.db.process_item("liquidation",items)
@@ -71,6 +74,8 @@ class Okex(Spider):
                 symbol=i["uly"]
                 if i["ctValCcy"]!="USD":
                     param = await self.get_param(symbol)
+                    ctVal=i["ctVal"]
+                    self.markets[symbol]=float(ctVal)
                     await self.request(url,data=param,callback="parse_liquidation")
         except:
             log.error(traceback.format_exc())

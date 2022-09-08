@@ -15,6 +15,7 @@ import configparser
 import aioredis
 from bee.mysqlpipeline import Mysqlpipline
 from bee.tools import *
+from dynaconf import Dynaconf
 
 def get_config():
     # 获取本爬虫的配制文件
@@ -26,15 +27,17 @@ def get_config():
 class Spider(object):
     name = ""
     start_urls=[]
-    request_param={"limit":1}
+    request_param={"limit":50}
     delay_queue=dict()
+
     def __init__(self):
         # todo 初始化配置文件与redis
         self.loop = asyncio.get_event_loop()
-        self.config= get_config()
-        url=self.config["REDIS"].get("url")
+        self.config= Dynaconf(settings_files=['settings.yaml', '.secrets.yaml'])
+        url=self.config.redis
         self.queue=aioredis.from_url(url,decode_responses=True)
-        self.db=Mysqlpipline(self.loop,self.config["DB"])
+        param={"host":self.config.mysql_host,"port":self.config.mysql_port,"user":self.config.mysql_user,"password":self.config.mysql_pwd,"db":self.config.mysql_db}
+        self.db=Mysqlpipline(self.loop,param)
 
     async def start_requests(self):
         """
@@ -98,6 +101,7 @@ class Spider(object):
                 jobs=self.delay_queue.pop(first)
                 for i in jobs:
                     await self.request(i["url"],i["data"],i["method"],i["callback"])
+                    # log.info(f"延时队列{first}-{i['data']}")
 
     async  def regist(self):
         prex_name="bee:worker"

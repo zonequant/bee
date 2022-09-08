@@ -20,6 +20,7 @@ headers = {
 }
 
 lock = asyncio.Lock()
+
 class Woker(object):
     update_rate=5
     prex_job_name="bee:worker:job:"
@@ -43,11 +44,11 @@ class Woker(object):
         return self.session
 
     async def update(self):
-        if get_timestamp_s()-self.last_update>self.update_rate:
-            data={"time":get_timestamp_s(),
+        if get_timestamp_ms()-self.last_update>self.update_rate:
+            data={"time":get_timestamp_ms(),
                   "IP":get_host_ip()}
             await self.queue.hset(self.prex_name,self.id,json.dumps(data))
-            self.last_update=get_timestamp_s()
+            self.last_update=get_timestamp_ms()
 
     async def fetch(self,req):
         '''
@@ -73,7 +74,7 @@ class Woker(object):
             log.error(traceback.format_exc())
 
     async def delay(self,key):
-        timestamp=get_timestamp_s()
+        timestamp=get_timestamp_ms()
         if key in self.rateLimit:
             elapsed = timestamp -self.last_request.get(key,0)
             rateLimit=self.rateLimit[key].get("limit",0)
@@ -99,7 +100,7 @@ class Woker(object):
                     log.debug(f"New Task:{key}-{job['url']}")
                     reponse=await self.fetch(job)
                     if reponse:
-                        self.last_request[key]=get_timestamp_s()  #爬取后更新最后一次访问时间
+                        self.last_request[key]=get_timestamp_ms()  #爬取后更新最后一次访问时间
                         await self.queue.lpush(out_key,json.dumps(reponse))
                         self.count=self.count+1
                         log.debug(f"Task:{key}-{job['url']} is complete.")
