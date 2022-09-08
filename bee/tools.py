@@ -7,6 +7,7 @@ import socket
 import uuid
 import psutil as ps
 from datetime import datetime
+from dateutil import tz,parser
 
 def get_hostname():
     return socket.gethostname()
@@ -72,6 +73,6 @@ def ts_to_datetime_str(ts=None, fmt='%Y-%m-%d %H:%M:%S.%f'):
     @param ts 时间戳，默认None即为当前时间戳
     @param fmt 返回的日期字符串格式
     """
-
-    dt = datetime.fromtimestamp(ts / 1000)
+    dt = datetime.fromtimestamp(ts/1000)
+    dt=dt.astimezone(tz.gettz('Asia/Shanghai'))
     return dt.strftime(fmt)
