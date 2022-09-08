@@ -38,7 +38,7 @@ class Okex(Spider):
             items.append(item)
         if len(items)>0:
             ts=items[-1]["ts"]
-            ts=int(ts.timestamp()*1000)+1
+            ts=int(ts.timestamp()*1000)+100
         else:
             ts=get_timestamp_ms()
         self.next(symbol,ts)
@@ -52,7 +52,7 @@ class Okex(Spider):
         param = {"uly": symbol, "instType": "SWAP", "state": "filled", "before": ts}
         next_ts=get_timestamp_ms()+self.period*1000
         self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
-        # log.info(f"推入延时队列{next_ts}-{param}")
+        log.info(f"推入延时队列{next_ts}-{param}")
     async def pipe_item(self, items):
         # todo 保存数据库
         await self.db.process_item("liquidation",items)
@@ -72,7 +72,7 @@ class Okex(Spider):
             # await self.request(url, data=param, callback="parse_liquidation")
             for i in data:
                 symbol=i["uly"]
-                if i["ctValCcy"]!="USD":
+                if i["ctValCcy"]!="USD" and symbol=="BTC-USDT":
                     param = await self.get_param(symbol)
                     ctVal=i["ctVal"]
                     self.markets[symbol]=float(ctVal)
@@ -93,7 +93,7 @@ class Okex(Spider):
         if rs[0]==None:
             param = {"uly": symbol,"instType":"SWAP","state":"filled", "before": 0}
         else:
-            t=int(rs[0].timestamp()*1000)
+            t=int(rs[0].timestamp()*1000)+100
             param={"uly":symbol,"instType":"SWAP","state":"filled","before":t}
         return param
 
