@@ -71,7 +71,16 @@ class Woker(object):
                     req["response"] =await resp.text()
                     return req
         except Exception as e:
+            await self.re_work(req)
             log.error(traceback.format_exc())
+
+
+
+    async def re_work(self,req):
+        log.info(f"失败重新请求,延时1秒{req['url']}")
+        await asyncio.sleep(1)
+        await self.queue.lpop(req["key"],req)
+
 
     async def delay(self,key):
         timestamp=get_timestamp_ms()
@@ -97,6 +106,7 @@ class Woker(object):
                 job=(await self.queue.lpop(in_key))
                 if job:
                     job=json.loads(job)
+                    job["key"]=in_key
                     log.debug(f"New Task:{key}-{job['url']}")
                     reponse=await self.fetch(job)
                     if reponse:

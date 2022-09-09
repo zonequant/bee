@@ -42,21 +42,23 @@ class Okex(Spider):
         symbol=data["uly"]
         details=data["details"]
         items=[]
+        last_ts=0
         for i in details:
             side=i.get("side")
             sz=float(i.get("sz"))
             price = float(i.get("bkPx"))
             sz=self.markets[symbol]*sz
-            ts=datetime.fromtimestamp(int(i.get('ts'))/1000)
+            ts=int(i.get('ts'))
+            last_ts = ts if last_ts < ts else last_ts
+            ts=datetime.fromtimestamp(ts/1000)
             item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
             items.append(item)
-        if len(items)>0:
-            ts=items[-1]["ts"]
-            ts=int(ts.timestamp()*1000)+100
-            self.next(symbol, ts)
+        if last_ts>0:
+            self.next(symbol, last_ts+1)
         else:
-            ts=get_timestamp_ms()
-            self.next(symbol, ts,True)
+            last_ts=get_timestamp_ms()
+            self.next(symbol, last_ts,True)
+        # log.info(f"parse item -{len(items)},{items}")
         return items
 
     def next(self, symbol,ts,delay=False):
@@ -69,11 +71,13 @@ class Okex(Spider):
             next_ts=get_timestamp_ms()+self.period*1000
         else:
             next_ts = get_timestamp_ms()+1000
+
         self.request_delay(next_ts,url=url, data=param,method="GET", callback="parse_liquidation")
         # log.info(f"推入延时队列{next_ts}-{param}")
 
     async def pipe_item(self, items):
         # todo 保存数据库
+        # log.info(f"save items-len{len(items)},{items}")
         await self.db.process_item("liquidation",items)
 
     async def parse(self, data):
@@ -91,10 +95,10 @@ class Okex(Spider):
             # await self.request(url, data=param, callback="parse_liquidation")
             for i in data:
                 symbol=i["uly"]
-                if i["ctValCcy"]!="USD":
+                if i["ctValCcy"]!="USD" :
                     param = await self.get_param(symbol)
                     await self.request(url,data=param,callback="parse_liquidation")
-                    # log.info(f"new request {url}-{param}")
+                    log.info(f"new request {url}-{param}")
         except:
             log.error(traceback.format_exc())
 
