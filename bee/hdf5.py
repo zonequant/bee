@@ -12,7 +12,7 @@ import pymysql
 import datetime
 from bee.config import cfg
 from loguru import logger as log
-db=pymysql.connect(host=cfg.mysql_host,port=3306,user='root',password='root_pwd',database='bee',charset='utf8')
+db=pymysql.connect(host=cfg.mysql_host,port=3306,user=cfg.mysql_user,password=cfg.mysql_pwd,database=cfg.mysql_db,charset='utf8')
 # sql = "select * from liquidation"
 # data=pd.read_sql(sql,con=db,index_col="ts")
 # store = pd.HDFStore('store.h5')
