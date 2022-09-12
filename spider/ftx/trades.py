@@ -83,11 +83,11 @@ class Ftx_liqudation(Websocket):
                     tz_sh = tz.gettz('Asia/Shanghai')
                     ts=ts.astimezone(tz_sh)
                     ts=ts.strftime("%Y-%m-%d %H:%M:%S.%f")
-                    traders.append(("ftx",symbol,side,price,volume,amount,ts))
+                    # traders.append(("ftx",symbol,side,price,volume,amount,ts))
                     if liquidation:
                         liqs.append(("ftx",symbol,side,price,volume,ts))
-                if len(traders)>0:
-                    self.execute_db(sql_trader,traders)
+                # if len(traders)>0:
+                    # self.execute_db(sql_trader,traders)
                 if len(liqs)>0:
                     self.execute_db(sql_liq,liqs)
 
