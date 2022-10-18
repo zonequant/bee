@@ -6,26 +6,17 @@
 """
 # -*- coding:utf-8 -*-
 from pycoingecko import CoinGeckoAPI
-
 import pandas as pd
 import time
 from loguru import logger as log
 import pymysql
 import datetime, dateutil.parser
 import traceback
-
-import configparser
-
-def get_config():
-    # 获取本爬虫的配制文件
-    cfg=configparser.ConfigParser()
-    cfg.read("./config.ini")
-    return cfg
+from dynaconf import Dynaconf
 
 
 cg = CoinGeckoAPI()
-
-config=get_config()["DB"]
+config=Dynaconf(settings_files=['settings.yaml', '.secrets.yaml'])
 db = pymysql.connect(host=config["host"],user=config["user"],password=config["password"],database=config["database"])
 cursor = db.cursor()
 lenght=15
