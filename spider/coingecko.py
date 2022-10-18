@@ -62,25 +62,26 @@ def run():
 
 
 def highlow(day_time,cap):
-    sql ="select symbol,price from markets where dt=%s"
-    cursor.execute(sql, [day_time])
-    dt=cursor.fetchall()
-    refdate=day_time+datetime.timedelta(days=lenght)
+    refdate=day_time-datetime.timedelta(days=lenght)
+    sql = "SELECT symbol,max(high),min(low) FROM markets WHERE dt  >=%s and dt <%s group by symbol"
+    cursor.execute(sql,[refdate, day_time])
+    ref_data = cursor.fetchall()
+    hl={}
+    for i in ref_data:
+        hl[i[0]]=i
     highs=0
     lows=0
+    sql = "select symbol,high,low from markets where dt=%s"
+    cursor.execute(sql, [day_time])
+    dt = cursor.fetchall()
     for i in list(dt):
-        sql="select dt,symbol,high,low,price from markets where symbol=%s and dt  >=%s and dt <%s "
-        cursor.execute(sql, [i[0],refdate,day_time])
-        ref_data = cursor.fetchall()
-        if len(ref_data)>0:
-            data=pd.DataFrame(ref_data,columns=["datetime","symbol","high","low","price"])
-            low=data["low"].min()
-            high=data["high"].max()
-            price=i[1]
-            if price>high:
-                highs+=1
-            if price<low:
-                lows+=1
+        if i[0] in hl:
+            high = hl[i[0]][1]
+            low = hl[i[0]][2]
+            if i[1] > high:
+                highs += 1
+            if i[2] < low:
+                lows += 1
     sql="INSERT INTO highlows(datetime,market_cap,highs,lows) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
     cursor.execute(sql,[day_time,cap,highs,lows])
     db.commit()
