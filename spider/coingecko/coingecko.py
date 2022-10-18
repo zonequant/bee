@@ -17,7 +17,7 @@ from dynaconf import Dynaconf
 
 cg = CoinGeckoAPI()
 config=Dynaconf(settings_files=['settings.yaml', '.secrets.yaml'])
-db = pymysql.connect(host=config["host"],user=config["user"],password=config["password"],database=config["database"])
+db = pymysql.connect(host=config["host"],user=config["user"],password=config["password"],database=config["db"])
 cursor = db.cursor()
 lenght=15
 
