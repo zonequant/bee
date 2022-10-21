@@ -46,7 +46,7 @@ def run():
     db.execute(sql_insert, values,types_check=True)
 
     log.info("更新数据成功！")
-    highlow(day_time,cap)
+    highlow(day_time,int(cap))
 
 
 def highlow(day_time,cap):
