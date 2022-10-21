@@ -99,7 +99,7 @@ class Ftx_liqudation(Websocket):
         """更新/新增/删除"""
         try:
             # 检查连接是否断开，如果断开就进行重连
-            self.db.execute(sql, [param], types_check=True)
+            self.db.execute(sql, param, types_check=True)
         except Exception as e:
             log.debug(sql)
             log.debug(param)
