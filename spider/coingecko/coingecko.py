@@ -43,6 +43,7 @@ def run():
     if len(dt) > 0:
         sql = "alter table markets delete  where dt=toDateTime(%(date)s)"
         db.execute(sql, {'date':day_time})
+    print(values[0])
     db.execute(sql_insert, values)
 
     log.info("更新数据成功！")
