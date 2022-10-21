@@ -47,8 +47,10 @@ class Bybit_liqudation(Websocket):
 
     async def connected_callback(self):
         await self.send('{"op":"subscribe","args":["liquidation"]}')
+        log.debug(f"subscribe liq")
 
     async def process_callback(self,data):
+        print(data)
         if "topic" in data:
             print(data["data"])
             data=data["data"]
