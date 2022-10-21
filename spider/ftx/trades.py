@@ -83,7 +83,8 @@ class Ftx_liqudation(Websocket):
                     ts =parser.parse(i["time"])
                     tz_sh = tz.gettz('Asia/Shanghai')
                     ts=ts.astimezone(tz_sh)
-                    # ts=ts.strftime("%Y-%m-%d %H:%M:%S.%f")
+                    ts=ts.strftime("%Y-%m-%d %H:%M:%S.%f")
+                    ts=datetime.strptime(ts,"%Y-%m-%d %H:%M:%S.%f")
                     # traders.append(("ftx",symbol,side,price,volume,amount,ts))
                     if liquidation:
                         liqs.append(("ftx",symbol,side,price,volume,ts))
