@@ -15,7 +15,7 @@ from dynaconf import Dynaconf
 import time
 import asyncio
 from aiohttp.http import WSMsgType
-
+from clickhouse_driver import Client
 
 class Binance_liqudation(Websocket):
     url="wss://fstream.binance.com/ws"
@@ -33,7 +33,7 @@ class Binance_liqudation(Websocket):
         user=self.confg["user"]
         pwd=self.confg['password']
         db=self.confg['db']
-        self.db=pymysql.connect(host=host, user=user, password=pwd, database=db)
+        self.db=Client(host=host, user=user, password=pwd, database=db)
 
     def start(self):
         """
@@ -51,30 +51,32 @@ class Binance_liqudation(Websocket):
             e=data.get("e",None)
             if "forceOrder" ==e:
                 data=data["o"]
-                sql_insert = "insert into liquidation(broker,symbol,side,price,volume,ts) values (%s,%s,%s,%s,%s,%s)"
-                values = ["binance", data["s"], data["S"], data["p"], data["q"], ts_to_datetime_str(data["T"])]
-                self.execute_db(sql_insert, values)
+                sql_insert = "insert into liquidation values"
+                values = ["binance", data["s"], data["S"], data["p"], data["q"], ts_to_datetime(data["T"])]
+                self.db.execute(sql_insert, [values])
+                # self.execute_db(sql_insert, values)
         except:
             log.error(traceback.format_exc())
 
 
     def execute_db(self, sql,param=None):
         """更新/新增/删除"""
-        try:
-            # 检查连接是否断开，如果断开就进行重连
-            self.db.ping(reconnect=True)
-            with self.db.cursor() as cursor:
-                if param:
-                    cursor.execute(sql, param)
-                else:
-                    cursor.execute(sql)
-                self.db.commit()
-            # log.debug(sql)
-            # log.debug(param)
-        except Exception as e:
-            traceback.print_exc()
-            # 回滚所有更改
-            self.db.rollback()
+        self.db.execute(sql,param)
+        # try:
+        #     # 检查连接是否断开，如果断开就进行重连
+        #     self.db.ping(reconnect=True)
+        #     with self.db.cursor() as cursor:
+        #         if param:
+        #             cursor.execute(sql, param)
+        #         else:
+        #             cursor.execute(sql)
+        #         self.db.commit()
+        #     # log.debug(sql)
+        #     # log.debug(param)
+        # except Exception as e:
+        #     traceback.print_exc()
+        #     # 回滚所有更改
+        #     self.db.rollback()
 
     async def ping(self):
         while True:
