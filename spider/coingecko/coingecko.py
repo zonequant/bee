@@ -9,7 +9,7 @@ from pycoingecko import CoinGeckoAPI
 import pandas as pd
 import time
 from loguru import logger as log
-import pymysql
+from clickhouse_driver import Client
 import datetime, dateutil.parser
 import traceback
 from dynaconf import Dynaconf
@@ -17,8 +17,8 @@ from dynaconf import Dynaconf
 
 cg = CoinGeckoAPI()
 config=Dynaconf(settings_files=['settings.yaml', '.secrets.yaml'])
-db = pymysql.connect(host=config["host"],user=config["user"],password=config["password"],database=config["db"])
-cursor = db.cursor()
+db =Client(host=config["host"],user=config["user"],password=config["password"],database=config["db"])
+
 lenght=15
 
 
@@ -28,7 +28,6 @@ def run():
     coins = cg.get_coins_markets(vs_currency="usd")
     dt = pd.DataFrame(coins)
     cap = dt["market_cap"].sum()
-    sql_symbol = "select * from markets where symbol=%s and dt<%s"
     values = []
     for i in coins:
         symbol = i["symbol"]
@@ -37,34 +36,30 @@ def run():
             i["rank"] = i["market_cap"] / cap
             values.append((symbol, day_time, i["current_price"], i["market_cap"], i['market_cap_rank'], i["rank"],
                            i['total_volume'], i['high_24h'], i["low_24h"],i["price_change_percentage_24h"], dateutil.parser.parse(i["last_updated"])))
-    sql_insert = "insert into markets(symbol,dt,price,market_cap,market_cap_rank,cap_rank,volume,high,low,rise,last_updated) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    sql_insert = "insert into markets(symbol,dt,price,market_cap,market_cap_rank,cap_rank,volume,high,low,rise,last_updated) values"
     day_time = values[0][1]
-    sql = "select count(dt) from markets where dt=%s"
-    cursor.execute(sql, [day_time])
-    dt = cursor.fetchall()
+    sql = "select count(dt) from markets where dt=toDateTime(%s)"
+    dt=db.execute(sql, [day_time])
     if len(dt) > 0:
-        sql = "delete from markets where dt=%s"
-        cursor.execute(sql, [day_time])
-        db.commit()
-    cursor.executemany(sql_insert, values)
-    db.commit()
+        sql = "delete from markets where dt=toDatetime(%s)"
+        db.execute(sql, [day_time])
+    db.execute(sql_insert, values)
+
     log.info("更新数据成功！")
     highlow(day_time,cap)
 
 
 def highlow(day_time,cap):
     refdate=day_time-datetime.timedelta(days=lenght)
-    sql = "SELECT symbol,max(high),min(low) FROM markets WHERE dt  >=%s and dt <%s group by symbol"
-    cursor.execute(sql,[refdate, day_time])
-    ref_data = cursor.fetchall()
+    sql = "SELECT symbol,max(high),min(low) FROM markets WHERE dt  >=toDateTime(%s) and dt <toDateTime(%s) group by symbol"
+    ref_data=db.execute(sql,[refdate, day_time])
     hl={}
     for i in ref_data:
         hl[i[0]]=i
     highs=0
     lows=0
     sql = "select symbol,high,low from markets where dt=%s"
-    cursor.execute(sql, [day_time])
-    dt = cursor.fetchall()
+    dt=db.execute(sql, [day_time])
     for i in list(dt):
         if i[0] in hl:
             high = hl[i[0]][1]
@@ -74,18 +69,10 @@ def highlow(day_time,cap):
             if i[2] < low:
                 lows += 1
     sql="INSERT INTO highlows(datetime,market_cap,highs,lows) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
-    cursor.execute(sql,[day_time,cap,highs,lows])
-    db.commit()
+    db.execute(sql,[day_time,cap,highs,lows])
     log.info("更新前高前低数据成功！")
 
 
-def his():
-    sql="select dt,sum(market_cap) from markets group by dt"
-    cursor.execute(sql)
-    dt=cursor.fetchall()
-    for i in list(dt):
-        highlow(i[0],i[1])
-        log.info(f"更新hl{i[0]}")
 #
 # def top(data):
 #     tops=[]

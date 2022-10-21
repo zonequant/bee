@@ -42,5 +42,6 @@ def main():
         data.to_hdf(path+"/binance_1m.h5",i["symbol"],complevel=5)
         log.info(f"{i['symbol']} is complete.")
 
+
 if __name__ == '__main__':
     main()

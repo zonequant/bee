@@ -8,7 +8,7 @@ import pymysql
 import json
 conn=pymysql.connect(host="10.0.10.3",user="market",password="c6wwB4d3rABJFwkH",db="market")
 sql="INSERT INTO liquidation (broker, symbol, side, volume, price, avgprice, ts) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-input=open("/root/liquidation.sql","r")
+input=open("/root/.liquidation.sql","r")
 line=input.readline()
 data=[]
 i=0
