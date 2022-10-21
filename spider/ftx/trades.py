@@ -91,7 +91,7 @@ class Ftx_liqudation(Websocket):
                     # self.execute_db(sql_trader,traders)
                 if len(liqs)>0:
                     # self.execute_db(sql_liq,liqs)
-                    self.param(sql_liq, liqs)
+                    self.execute_db(sql_liq, liqs)
 
 
     def execute_db(self, sql,param=None):
