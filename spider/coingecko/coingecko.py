@@ -38,8 +38,8 @@ def run():
                            i['total_volume'], i['high_24h'], i["low_24h"],i["price_change_percentage_24h"], dateutil.parser.parse(i["last_updated"])))
     sql_insert = "insert into markets(symbol,dt,price,market_cap,market_cap_rank,cap_rank,volume,high,low,rise,last_updated) values"
     day_time = values[0][1]
-    sql = "select count(dt) from markets where dt=toDateTime(%s)"
-    dt=db.execute(sql, [day_time])
+    sql = "select count(dt) from markets where dt=toDateTime(%(date)s)"
+    dt=db.execute(sql, {'date':day_time})
     if len(dt) > 0:
         sql = "delete from markets where dt=toDatetime(%s)"
         db.execute(sql, [day_time])
