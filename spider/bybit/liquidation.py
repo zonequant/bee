@@ -46,7 +46,7 @@ class Bybit_liqudation(Websocket):
 
 
     async def connected_callback(self):
-        await self.send('{"op":"subscribe","args":["liquidation"]}')
+        await self.send('{"op":"subscribe","args":["liquidation.*"]}')
         log.debug(f"subscribe liq")
 
     async def process_callback(self,data):
