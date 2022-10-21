@@ -66,7 +66,7 @@ class Ftx_liqudation(Websocket):
 
     async def process_callback(self,data):
         sql_trader = "insert into trades(broker,symbol,side,price,volume,amount,ts) values (%s,%s,%s,%s,%s,%s,%s)"
-        sql_liq = "insert into liquidation values"
+        sql_liq = "insert into liq values"
         # print(data)
         if "channel" in data:
             symbol = data.get("market")
