@@ -41,8 +41,8 @@ def run():
     sql = "select count(dt) from markets where dt=toDateTime(%(date)s)"
     dt=db.execute(sql, {'date':day_time})
     if len(dt) > 0:
-        sql = "delete from markets where dt=toDatetime(%s)"
-        db.execute(sql, [day_time])
+        sql = "delete from markets where dt=toDatetime(%(date)s)"
+        db.execute(sql, {'date':day_time})
     db.execute(sql_insert, values)
 
     log.info("更新数据成功！")
@@ -51,15 +51,15 @@ def run():
 
 def highlow(day_time,cap):
     refdate=day_time-datetime.timedelta(days=lenght)
-    sql = "SELECT symbol,max(high),min(low) FROM markets WHERE dt  >=toDateTime(%s) and dt <toDateTime(%s) group by symbol"
-    ref_data=db.execute(sql,[refdate, day_time])
+    sql = "SELECT symbol,max(high),min(low) FROM markets WHERE dt  >=toDateTime(%(st)s) and dt <toDateTime(%(ed)s) group by symbol"
+    ref_data=db.execute(sql,{"st":refdate, "ed":day_time})
     hl={}
     for i in ref_data:
         hl[i[0]]=i
     highs=0
     lows=0
-    sql = "select symbol,high,low from markets where dt=%s"
-    dt=db.execute(sql, [day_time])
+    sql = "select symbol,high,low from markets where dt=toDateTime(%(date)s)"
+    dt=db.execute(sql, {'date':day_time})
     for i in list(dt):
         if i[0] in hl:
             high = hl[i[0]][1]
@@ -68,7 +68,7 @@ def highlow(day_time,cap):
                 highs += 1
             if i[2] < low:
                 lows += 1
-    sql="INSERT INTO highlows(datetime,market_cap,highs,lows) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
+    sql="INSERT INTO highlows(datetime,market_cap,highs,lows) VALUES ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
     db.execute(sql,[day_time,cap,highs,lows])
     log.info("更新前高前低数据成功！")
 
