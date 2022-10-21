@@ -15,6 +15,8 @@ import aiomysql
 from bee.tools import *
 from bee.sqlorm import *
 from dynaconf import Dynaconf
+from clickhouse_driver import Client
+
 
 class Bybit_liqudation(Websocket):
     url="wss://stream.bybit.com/realtime"
@@ -32,7 +34,7 @@ class Bybit_liqudation(Websocket):
         user=self.confg["user"]
         pwd=self.confg['password']
         db=self.confg['db']
-        self.db=pymysql.connect(host=host, user=user, password=pwd, database=db)
+        self.db = Client(host=host, user=user, password=pwd, database=db)
 
     def start(self):
         """
@@ -50,12 +52,12 @@ class Bybit_liqudation(Websocket):
         if "topic" in data:
             print(data["data"])
             data=data["data"]
-            sql_insert = "insert into liquidation(broker,symbol,side,price,volume,ts) values (%s,%s,%s,%s,%s,%s)"
+            sql_insert = "insert into liq"
             symbol=data["symbol"]
             side = data["side"]
             price = float(data["price"])
             volume = float(data["qty"])/price
-            ts = ts_to_datetime_str(data["time"])
+            ts = ts_to_datetime(data["time"])
             data=("bybit",symbol,side,price,volume,ts)
             self.execute_db(sql_insert,data)
 
@@ -63,19 +65,12 @@ class Bybit_liqudation(Websocket):
         """更新/新增/删除"""
         try:
             # 检查连接是否断开，如果断开就进行重连
-            self.db.ping(reconnect=True)
-            with self.db.cursor() as cursor:
-                if param:
-                    cursor.execute(sql, param)
-                else:
-                    cursor.execute(sql)
-                self.db.commit()
-            # log.debug(sql)
-            # log.debug(param)
+            self.db.execute(sql, [param], types_check=True)
         except Exception as e:
+            log.debug(sql)
+            log.debug(param)
             traceback.print_exc()
-            # 回滚所有更改
-            self.db.rollback()
+
 
     async def ping(self):
 
