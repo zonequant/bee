@@ -51,7 +51,7 @@ class Binance_liqudation(Websocket):
             e=data.get("e",None)
             if "forceOrder" ==e:
                 data=data["o"]
-                sql_insert = "insert into liquidation values"
+                sql_insert = "insert into liq values"
                 values = ["binance", data["s"], data["S"], data["p"], data["q"], ts_to_datetime(data["T"])]
                 self.db.execute(sql_insert, [values])
                 # self.execute_db(sql_insert, values)
