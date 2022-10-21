@@ -41,7 +41,7 @@ def run():
     sql = "select count(dt) from markets where dt=toDateTime(%(date)s)"
     dt=db.execute(sql, {'date':day_time})
     if len(dt) > 0:
-        sql = "alter table markets delete  where dt=toDatetime(%(date)s)"
+        sql = "alter table markets delete  where dt=toDateTime(%(date)s)"
         db.execute(sql, {'date':day_time})
     db.execute(sql_insert, values)
 
