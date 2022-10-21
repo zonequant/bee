@@ -32,10 +32,10 @@ def run():
     for i in coins:
         symbol = i["symbol"]
         if symbol not in usd:
-            day_time = dateutil.parser.parse(dateutil.parser.parse(i["last_updated"]).strftime("%Y-%m-%d"))
+            day_time =dateutil.parser.parse(i["last_updated"]).strftime("%Y-%m-%d")
             i["rank"] = i["market_cap"] / cap
             values.append((symbol, day_time, i["current_price"], i["market_cap"], i['market_cap_rank'], i["rank"],
-                           i['total_volume'], i['high_24h'], i["low_24h"],i["price_change_percentage_24h"], dateutil.parser.parse(i["last_updated"])))
+                           i['total_volume'], i['high_24h'], i["low_24h"],i["price_change_percentage_24h"],i["last_updated"]))
     sql_insert = "insert into markets(symbol,dt,price,market_cap,market_cap_rank,cap_rank,volume,high,low,rise,last_updated) values"
     day_time = values[0][1]
     sql = "select count(dt) from markets where dt=toDateTime(%(date)s)"
