@@ -52,8 +52,8 @@ class Binance_liqudation(Websocket):
             if "forceOrder" ==e:
                 data=data["o"]
                 sql_insert = "insert into liq values"
-                values = ["binance", data["s"], data["S"], data["p"], data["q"], ts_to_datetime(data["T"])]
-                self.db.execute(sql_insert, [values])
+                values = ["binance", data["s"], data["S"], float(data["p"]), float(data["q"]), ts_to_datetime(data["T"])]
+                self.db.execute(sql_insert, [values],types_check=True)
                 # self.execute_db(sql_insert, values)
         except:
             log.error(traceback.format_exc())
