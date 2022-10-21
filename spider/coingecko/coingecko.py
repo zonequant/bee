@@ -32,19 +32,18 @@ def run():
     for i in coins:
         symbol = i["symbol"]
         if symbol not in usd:
-            day_time =dateutil.parser.parse(i["last_updated"]).strftime("%Y-%m-%d")
+            day_time =dateutil.parser.parse(dateutil.parser.parse(i["last_updated"]).strftime("%Y-%m-%d"))
             i["rank"] = i["market_cap"] / cap
             values.append((symbol, day_time, i["current_price"], i["market_cap"], i['market_cap_rank'], i["rank"],
-                           i['total_volume'], i['high_24h'], i["low_24h"],i["price_change_percentage_24h"],dateutil.parser.parse(i["last_updated"]).strftime("%Y-%m-%d %H:%M:%S")))
-    sql_insert = "insert into markets(symbol,dt,price,market_cap,market_cap_rank,cap_rank,volume,high,low,rise,last_updated) values"
+                           i['total_volume'], i['high_24h'], i["low_24h"],dateutil.parser.parse(i["last_updated"]),i["price_change_percentage_24h"]))
+    sql_insert = "insert into markets values"
     day_time = values[0][1]
     sql = "select count(dt) from markets where dt=toDateTime(%(date)s)"
     dt=db.execute(sql, {'date':day_time})
     if len(dt) > 0:
         sql = "alter table markets delete  where dt=toDateTime(%(date)s)"
         db.execute(sql, {'date':day_time})
-    print(values[0])
-    db.execute(sql_insert, values)
+    db.execute(sql_insert, values,types_check=True)
 
     log.info("更新数据成功！")
     highlow(day_time,cap)
@@ -70,7 +69,7 @@ def highlow(day_time,cap):
             if i[2] < low:
                 lows += 1
     sql="INSERT INTO highlows(datetime,market_cap,highs,lows) VALUES ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
-    db.execute(sql,[day_time,cap,highs,lows])
+    db.execute(sql,[[day_time,cap,highs,lows]],types_check=True)
     log.info("更新前高前低数据成功！")
 
 
