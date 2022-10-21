@@ -68,7 +68,12 @@ def highlow(day_time,cap):
                 highs += 1
             if i[2] < low:
                 lows += 1
-    sql="INSERT INTO highlows  VALUES ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap),highs=VALUES(highs),lows=VALUES(lows)"
+    sql='select dt from highlows where dt=toDateTime(%(date)s)'
+    dt=db.execute(sql,{'date':day_time})
+    if len(dt)>0:
+        sql = "alter table highlows delete  where dt=toDateTime(%(date)s)"
+        db.execute(sql, {'date':day_time})
+    sql="INSERT INTO highlows  VALUES"
     db.execute(sql,[[day_time,cap,highs,lows]],types_check=True)
     log.info("更新前高前低数据成功！")
 
