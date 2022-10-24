@@ -82,7 +82,7 @@ class Okex(Spider):
     async def pipe_item(self, items):
         # todo 保存数据库
         # log.info(f"save items-len{len(items)},{items}")
-        await self.db.process_item("liquidation",items)
+        await self.db.process_item("liq",items)
 
     async def parse(self, data):
         """
