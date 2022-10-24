@@ -8,10 +8,11 @@
 from bee.pipeline import Pipeline
 from clickhouse_driver import Client
 from  bee.sqlorm  import *
+
 class ClickHousepipline(Pipeline):
     def __init__(self,loop,param):
         self.loop=loop
-        self.__conn= self.loop.run_until_complete(self.create_pool(param))
+        self.__conn= self.create_pool(param)
 
     def create_pool(self,kwargs):
         host=kwargs.get('host', 'localhost')
