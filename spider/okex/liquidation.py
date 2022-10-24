@@ -113,7 +113,7 @@ class Okex(Spider):
 
     async def get_param(self,symbol):
         # todo 从数据中获取最近需要下载的参数
-        sql="select max(ts) from liquidation where symbol=%(symbol)s and broker=%(broker)s"
+        sql="select max(ts) from liq where symbol=%(symbol)s and broker=%(broker)s"
         ds=self.db.select(sql,{"sybmol":symbol,"broker":self.name})
         rs=ds[0]
         if rs[0]==None:
