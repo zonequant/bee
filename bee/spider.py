@@ -39,7 +39,7 @@ class Spider(object):
         url=self.config.redis
         self.queue=aioredis.from_url(url,decode_responses=True)
         param={"host":self.config.host,"user":self.config.user,"password":self.config.pwd,"db":self.config.db}
-        db=self.config.db
+        db=self.config.database
 
         if db=="mysql":
             self.db=Mysqlpipline(self.loop,param)
