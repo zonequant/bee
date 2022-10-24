@@ -27,3 +27,6 @@ class ClickHousepipline(Pipeline):
     def process_item(self,table,item):
         sql=f"insert into {table} values"
         self.__conn.execute(sql,item,types_check=True)
+
+    def select(self,sql,param):
+        return self.__conn.execute(sql,param,types_check=True)
