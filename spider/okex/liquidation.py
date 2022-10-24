@@ -36,30 +36,35 @@ class Okex(Spider):
 
     async def parse_liquidation(self,data):
         # todo 解析数据生成items
-        response = data.get("response")
-        data=json.loads(response)
-        data=data["data"][0]
-        symbol=data["uly"]
-        details=data["details"]
-        items=[]
-        last_ts=0
-        for i in details:
-            side=i.get("side")
-            sz=float(i.get("sz"))
-            price = float(i.get("bkPx"))
-            sz=self.markets[symbol]*sz
-            ts=int(i.get('ts'))
-            last_ts = ts if last_ts < ts else last_ts
-            ts=datetime.fromtimestamp(ts/1000)
-            item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
-            items.append(item)
-        if last_ts>0:
-            self.next(symbol, last_ts+1)
-        else:
-            last_ts=get_timestamp_ms()
-            self.next(symbol, last_ts,True)
-        # log.info(f"parse item -{len(items)},{items}")
-        return items
+        try:
+            response = data.get("response")
+            data=json.loads(response)
+
+            dt=data["data"][0]
+            symbol=dt["uly"]
+            details=dt["details"]
+            items=[]
+            last_ts=0
+            for i in details:
+                side=i.get("side")
+                sz=float(i.get("sz"))
+                price = float(i.get("bkPx"))
+                sz=self.markets[symbol]*sz
+                ts=int(i.get('ts'))
+                last_ts = ts if last_ts < ts else last_ts
+                ts=datetime.fromtimestamp(ts/1000)
+                item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
+                items.append(item)
+            if last_ts>0:
+                self.next(symbol, last_ts+1)
+            else:
+                last_ts=get_timestamp_ms()
+                self.next(symbol, last_ts,True)
+            # log.info(f"parse item -{len(items)},{items}")
+            return items
+        except:
+            traceback.print_exc()
+            print(data)
 
     def next(self, symbol,ts,delay=False):
         """
