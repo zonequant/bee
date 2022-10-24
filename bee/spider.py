@@ -16,6 +16,8 @@ import aioredis
 from bee.mysqlpipeline import Mysqlpipline
 from bee.tools import *
 from dynaconf import Dynaconf
+from bee.chpipeline import ClickHousepipline
+from bee.pipeline import Pipeline
 
 def get_config():
     # 获取本爬虫的配制文件
@@ -36,8 +38,15 @@ class Spider(object):
         self.config= Dynaconf(settings_files=['settings.yaml', '.secrets.yaml'])
         url=self.config.redis
         self.queue=aioredis.from_url(url,decode_responses=True)
-        param={"host":self.config.mysql_host,"port":self.config.mysql_port,"user":self.config.mysql_user,"password":self.config.mysql_pwd,"db":self.config.mysql_db}
-        self.db=Mysqlpipline(self.loop,param)
+        param={"host":self.config.host,"user":self.config.user,"password":self.config.pwd,"db":self.config.db}
+        db=self.config.db
+
+        if db=="mysql":
+            self.db=Mysqlpipline(self.loop,param)
+        elif db=="clickhouse":
+            self.db = ClickHousepipline(self.loop, param)
+        else:
+            self.db=Pipeline()
 
     async def start_requests(self):
         """

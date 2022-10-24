@@ -32,8 +32,6 @@ class Okex(Spider):
                 ctVal = i["ctVal"]
                 self.markets[symbol] = float(ctVal)
 
-
-
     async def parse_liquidation(self,data):
         # todo 解析数据生成items
         try:
@@ -54,7 +52,7 @@ class Okex(Spider):
                     ts=int(i.get('ts'))
                     last_ts = ts if last_ts < ts else last_ts
                     ts=datetime.fromtimestamp(ts/1000)
-                    item={"broker":self.name,"symbol":symbol,"price":price,"side":side.upper(),"volume":sz,"ts":ts}
+                    item=[self.name,symbol,side.upper(),price,sz,ts]
                     items.append(item)
                 if last_ts>0:
                     self.next(symbol, last_ts+1)
