@@ -62,10 +62,9 @@ class Okex(Spider):
                 # log.info(f"parse item -{len(items)},{items}")
                 return items
             else:
-                print(f"no data{data}")
-
-                # last_ts = get_timestamp_ms()
-                # self.next(symbol, last_ts, True)
+                next_ts = get_timestamp_ms()+1000*60
+                self.request_delay(next_ts, url=data["url"], data=data["data"], method=data["method"], callback=data["callback"])
+                log.info(f"推入延时队列{next_ts}-{data}")
         except:
             traceback.print_exc()
             print(data)
