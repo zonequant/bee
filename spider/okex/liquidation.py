@@ -36,8 +36,8 @@ class Okex(Spider):
         # todo 解析数据生成items
         try:
             response = data.get("response")
-            data=json.loads(response)
-            dt=data["data"]
+            response=json.loads(response)
+            dt=response["data"]
             if len(dt)>0:
                 dt=dt[0]
                 symbol=dt["uly"]
