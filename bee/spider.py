@@ -104,6 +104,7 @@ class Spider(object):
 
     async def next_request(self):
         t=sorted(self.delay_queue.keys())
+        print(f"next count:{len(t)}")
         if len(t)>0:
             first=t[0]
             if first<get_timestamp_ms():
