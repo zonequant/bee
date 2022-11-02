@@ -61,6 +61,11 @@ class Okex(Spider):
                     self.next(symbol, last_ts,True)
                 # log.info(f"parse item -{len(items)},{items}")
                 return items
+            else:
+                print(f"no data{data}")
+
+                # last_ts = get_timestamp_ms()
+                # self.next(symbol, last_ts, True)
         except:
             traceback.print_exc()
             print(data)
